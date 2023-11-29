@@ -4,7 +4,7 @@ import { Spin } from "antd";
 
 type parVal = {
   setUrl: React.Dispatch<React.SetStateAction<string>>;
-  host: string
+  host: string;
 };
 
 type parVid = {
@@ -17,16 +17,26 @@ function Home({ setUrl, host }: parVal) {
   const [data, setData] = useState<parVid[]>([]);
   const navigate = useNavigate();
 
+  console.log("<<<Rendering Homepage>>>");
+
   useEffect(() => {
-    console.log(host)
-    fetch(`${host}videos`
-    )
-      .then((resp) => resp.json())
-      .then((resp) => {
-        console.log(resp);
-        setData(resp.data);
-      })
-      .catch((error) => console.log("Error fetching data????", error));
+    let [start, end] = [0, 0];
+    const fetchData = () => {
+      fetch(`${host}videos?start=${start}&end=${end}`)
+        .then((resp) => resp.json())
+        .then((resp) => {
+          setData((prev) => {
+            [start, end] = [end, end + 12];
+            console.log(end);
+            return [...prev, ...resp.data];
+          });
+        });
+    };
+
+    fetchData();
+    const interval = setInterval(fetchData, 3000);
+
+    return () => clearInterval(interval);
   }, []);
 
   const videoPlayer = (link: string) => {
